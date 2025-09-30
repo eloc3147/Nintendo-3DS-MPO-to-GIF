@@ -444,5 +444,11 @@ def jump_to_click(event, scale):
     value = scale.cget("from") + (scale.cget("to") - scale.cget("from")) * event.x / scale.winfo_width()
     scale.set(int(value))
 
+
 # === START ===
-launch_splash(start_main_app)
+def main():
+    launch_splash(start_main_app)
+
+
+if __name__ == "__main__":
+    main()

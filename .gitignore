@@ -1,0 +1,3 @@
+build/
+mpo_to_gif.egg-info/
+**/__pycache__/**
