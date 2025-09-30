@@ -1,12 +1,9 @@
 import os
 import tempfile
 import tkinter as tk
-import moviepy.config as mpy_config
 from tkinter import ttk
 from PIL import Image, ImageSequence, ImageTk
-from datetime import datetime
 from tkinter import filedialog
-from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
 os.environ["IMAGEIO_FFMPEG_EXE"] = "ffmpeg.exe"
 
@@ -85,11 +82,6 @@ def start_main_app(input_path, output_path):
     
     canvas = tk.Canvas(window, bg=colors["bg_main"], highlightthickness=0)
     canvas.pack()
-    canvas_box = canvas.create_rectangle(
-        10, 10, 300, 300,
-        outline=colors["bg_box"],
-        width=2
-    )
 
     def handle_key(event):
         key = event.keysym.lower()
@@ -323,15 +315,6 @@ def create_gif(images, output_path, duration):
 def create_mp4(images, output_path, duration):
     try:
         fps = round(1000 / duration)
-#        clip = ImageSequenceClip(images, fps=fps)
-#        clip.write_videofile(
-#            output_path,
-#            codec="libx264",     # H.264 codec
-#            audio=False,
-#            preset="medium",
-#            ffmpeg_params=["-movflags", "faststart"]
-#        )
-#        clip.close()
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_paths = []
@@ -425,14 +408,16 @@ def skip_current():
 def skip_ahead():
     try:
         x = int(skip_entry.get())
-        remaining = len(mpo_files) - current_index - 1
-        if x > remaining:
-            print(f"❌ Cannot skip {x} files — only {remaining} remain.")
-        else:
-            print(f"⏭️ Skipping ahead {x} files...")
-            load_file(current_index + x)
-    except:
+    except ValueError:
         print("⚠️ Invalid skip value.")
+        return
+
+    remaining = len(mpo_files) - current_index - 1
+    if x > remaining:
+        print(f"❌ Cannot skip {x} files — only {remaining} remain.")
+    else:
+        print(f"⏭️ Skipping ahead {x} files...")
+        load_file(current_index + x)
 
 def exit_script():
     global window
