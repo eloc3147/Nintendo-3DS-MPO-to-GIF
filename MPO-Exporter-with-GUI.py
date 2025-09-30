@@ -147,6 +147,7 @@ def start_main_app(input_path, output_path):
             sliderlength=10,
             width=8,
             highlightthickness=0,
+            showvalue=False,
             troughcolor=colors["bg_slider"],
             bg=colors["bg_controls"],
             fg=colors["fg_value"],
