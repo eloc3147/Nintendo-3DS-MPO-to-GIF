@@ -21,10 +21,14 @@ MPO to GIF can currently only be installed using pip.
 
 ### Using pip
 
-1. Clone the repository: `git clone https://github.com/MarcusRinzsch/Nintendo-3DS-MPO-to-GIF.git`
-2. Enter the package directory: `cd Nintendo-3DS-MPO-to-GIF`
-3. Install the package using pip: `pip install .`
-4. You can now run MPO to GIF from the command line: `mpo-to-gif`
+```shell
+git clone https://github.com/MarcusRinzsch/Nintendo-3DS-MPO-to-GIF.git
+cd Nintendo-3DS-MPO-to-GIF
+pip install .
+
+# mpo-to-git is now available on the command line
+mpo-to-gif
+```
 
 ## Usage
 
