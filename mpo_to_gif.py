@@ -31,6 +31,10 @@ COLORS = {
     "fg_entry": "#003366",
     "fg_box": "#ffffff",         # white for bounding box text (if any)
 }
+OVERLAP_LIMIT = 100
+CROP_LIMIT = 200
+DURATION_MIN = 50
+DURATION_MAX = 1000
 
 
 # === SPLASH SCREEN ===
@@ -102,7 +106,7 @@ def create_slider(
     variable: tk.IntVar,
     grid_frame: tk.Frame,
     grid_coordinates: tuple[int, int],
-    command: Callable[[], None],
+    command: Callable[[], None] | None = None,
 ) -> tk.Scale:
     frame = tk.Frame(grid_frame, bg=COLORS["bg_controls"])
     frame.grid(row=grid_coordinates[0], column=grid_coordinates[1], padx=10, pady=5, sticky="w")
@@ -137,7 +141,7 @@ def create_slider(
         fg=COLORS["fg_value"],
         activebackground=COLORS["bg_slider_knob"],
         highlightbackground=COLORS["bg_controls"],
-        command=lambda v: command(),
+        command=lambda v: (command() if command else None),
         variable=variable,
     )
     scale.pack(side="left")
@@ -167,7 +171,6 @@ class App:
         # === State tracking
         self._current_index = 0
         self._current_file_name = ""
-        self._preview_interval = 0.05
         self._toggle = True
         self._left_img: Image.Image | None = None
         self._right_img: Image.Image | None = None
@@ -194,7 +197,7 @@ class App:
         self._crop_top = tk.IntVar(self._window, 0)
         self._crop_right = tk.IntVar(self._window, 0)
         self._crop_bottom = tk.IntVar(self._window, 0)
-        self._frame_duration = tk.IntVar(self._window, 175)
+        self._frame_duration = tk.IntVar(self._window, 50)
 
         # === APPLY COLORS TO WINDOW AND WIDGETS ===
         self._window.configure(bg=COLORS["bg_main"])
@@ -220,7 +223,7 @@ class App:
 
         self._overlap_slider = create_slider(
             "Overlap",
-            (-100, 100),
+            (-OVERLAP_LIMIT, OVERLAP_LIMIT),
             self._overlap,
             grid,
             (0, 0),
@@ -228,7 +231,7 @@ class App:
         )
         self._crop_left_slider = create_slider(
             "Crop Left",
-            (0, 200),
+            (0, CROP_LIMIT),
             self._crop_left,
             grid,
             (0, 1),
@@ -236,7 +239,7 @@ class App:
         )
         self._crop_top_slider = create_slider(
             "Crop Top",
-            (0, 200),
+            (0, CROP_LIMIT),
             self._crop_top,
             grid,
             (1, 0),
@@ -244,7 +247,7 @@ class App:
         )
         self._crop_right_slider = create_slider(
             "Crop Right",
-            (0, 200),
+            (0, CROP_LIMIT),
             self._crop_right,
             grid,
             (1, 1),
@@ -252,7 +255,7 @@ class App:
         )
         self._crop_bottom_slider = create_slider(
             "Crop Bottom",
-            (0, 200),
+            (0, CROP_LIMIT),
             self._crop_bottom,
             grid,
             (2, 0),
@@ -260,11 +263,10 @@ class App:
         )
         self._duration_slider = create_slider(
             "Frame Duration (ms)",
-            (50, 1000),
+            (DURATION_MIN, DURATION_MAX),
             self._frame_duration,
             grid,
             (2, 1),
-            self._update_duration,
         )
 
         # === BUTTONS ===
@@ -295,15 +297,69 @@ class App:
         self._crop_top.set(0)
         self._crop_right.set(0)
         self._crop_bottom.set(0)
-        self._frame_duration.set(175)
-        self._preview_interval = self._frame_duration.get() / 1000.0
+        self._frame_duration.set(50)
+        self._process_images()
 
     def _handle_key(self, event: tk.Event) -> None:
-        key = event.keysym.lower()
-        if key == "s":
+        key = event.char
+        if key == "[":
+            # Decrease overlap
+            self._overlap.set(max(-OVERLAP_LIMIT, self._overlap.get() - 1))
+            self._process_images()
+        elif key == "]":
+            # Increase overlap
+            self._overlap.set(min(OVERLAP_LIMIT, self._overlap.get() + 1))
+            self._process_images()
+        elif key == "L":
+            # Decrease left crop
+            self._crop_left.set(max(0, self._crop_left.get() - 1))
+            self._process_images()
+        elif key == "l":
+            # Increase left crop
+            self._crop_left.set(min(CROP_LIMIT, self._crop_left.get() + 1))
+            self._process_images()
+        elif key == "T":
+            # Decrease top crop
+            self._crop_top.set(max(0, self._crop_top.get() - 1))
+            self._process_images()
+        elif key == "t":
+            # Increase top crop
+            self._crop_top.set(min(CROP_LIMIT, self._crop_top.get() + 1))
+            self._process_images()
+        elif key == "R":
+            # Decrease right crop
+            self._crop_right.set(max(0, self._crop_right.get() - 1))
+            self._process_images()
+        elif key == "r":
+            # Increase right crop
+            self._crop_right.set(min(CROP_LIMIT, self._crop_right.get() + 1))
+            self._process_images()
+        elif key == "B":
+            # Decrease bottom crop
+            self._crop_bottom.set(max(0, self._crop_bottom.get() - 1))
+            self._process_images()
+        elif key == "b":
+            # Increase bottom crop
+            self._crop_bottom.set(min(CROP_LIMIT, self._crop_bottom.get() + 1))
+            self._process_images()
+        elif key == "D":
+            # Decrease duration
+            self._frame_duration.set(max(DURATION_MIN, self._frame_duration.get() - 1))
+        elif key == "d":
+            # Increase duration
+            self._frame_duration.set(min(DURATION_MAX, self._frame_duration.get() + 1))
+        elif key == "s":
+            # Skip to next image
             self._skip_current()
         elif key == "e":
+            # Export image
             self._export_current()
+        elif key == "x":
+            # Reset controls
+            self._reset_defaults()
+        elif key == "q":
+            # Quit
+            self._exit_script()
         elif key.startswith("kp_") or key.isdigit():
             self._skip_entry.focus_set()
 
@@ -342,7 +398,7 @@ class App:
         self._canvas.image = photo
         self._canvas.itemconfig(self._image_container, image=photo)
         self._toggle = not self._toggle
-        self._window.after(int(self._preview_interval * 1000), self._update_preview)
+        self._window.after(self._frame_duration.get(), self._update_preview)
 
     def _load_file(self, index: int) -> bool:
         if index >= len(self._mpo_files):
@@ -363,9 +419,6 @@ class App:
         return True
 
     # === CONTROL ACTIONS ===
-    def _update_duration(self) -> None:
-        self._preview_interval = self._frame_duration.get() / 1000.0
-
     def _export_current(self) -> None:
         assert self._left_img is not None and self._right_img is not None
 
