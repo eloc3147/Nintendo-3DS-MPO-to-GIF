@@ -8,7 +8,7 @@ version = "0.1.0"
 authors = [{name="Marcus Rinzsch"}]
 description = "Batch editing of all your amazing Nintendo 3DS images"
 readme = "README.md"
-dynamic = ["dependencies", "optional-dependencies"]
+dynamic = ["dependencies"]
 requires-python = ">=3.9"
 
 [project.scripts]
