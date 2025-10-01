@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mpo_to_gif"
-version = "0.1.0"
+version = "0.1.0" # Remember to change VERSION in mpo_to_gif.py as well
 authors = [{name="Marcus Rinzsch"}]
 description = "Batch editing of all your amazing Nintendo 3DS images"
 readme = "README.md"

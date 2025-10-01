@@ -7,6 +7,8 @@ from tkinter import filedialog
 from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
 os.environ["IMAGEIO_FFMPEG_EXE"] = "ffmpeg.exe"
 
+VERSION = "0.1.0"
+
 # === SPLASH SCREEN ===
 def launch_splash(on_submit):
     splash = tk.Tk()
@@ -17,7 +19,10 @@ def launch_splash(on_submit):
 
     # Title
     title = tk.Label(splash, text="MPO to GIF", font=("Segoe UI", 20, "bold"), bg=colors["bg_main"], fg=colors["fg_title"])
-    title.pack(pady=(30, 5))
+    title.pack(pady=(30, 0))
+
+    version_text = tk.Label(splash, text=f"v{VERSION}", font=("Segoe UI", 10), bg=colors["bg_main"], fg=colors["fg_label"])
+    version_text.pack(pady=(0, 5))
 
     subtitle = tk.Label(splash, text="by Marcus Rinzsch and some AI", font=("Segoe UI", 12), bg=colors["bg_main"], fg=colors["fg_label"])
     subtitle.pack(pady=(0, 20))
