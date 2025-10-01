@@ -293,9 +293,7 @@ class App:
             return
 
         self._update_preview()
-        print("Main pre main loop")
         self._window.mainloop()
-        print("Main loop done")
 
     def _reset_defaults(self) -> None:
         self._overlap = 0
